@@ -167,7 +167,7 @@ expTree::SetValue("x",0.25) will set global x to 0.25.
 - latexEquation : Another intuitive name of the type eTree. 
 
 ## Caution
-All calculation is performed in real space $\R$. Independent variables must be in domain of a function.
+All calculation is performed in real space $\mathbb{R}$. Independent variables must be in domain of a function.
 ```C++
 latexEquation* w = new latexEquation("\\sqrt{x}");    // h(x)=\\sqrt{x}
 double w1 = w->calculate(-1);    //h1 = \\sqrt{-1}  (error)
