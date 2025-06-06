@@ -62,7 +62,7 @@ int main(int argc,char *argv[])
         printf("\n");
 
         exp->parse(argv[1],"f(x)");
-
+        //exp->printTree("test.txt","a+",0);
        
 
         if(exp->parseSuccess == false)
@@ -74,6 +74,8 @@ int main(int argc,char *argv[])
         }
 
         latexEquation *differential = exp->differential();
+        //differential->printTree("test.txt","a+",0);
+
         
         for(int i=0;i<argc-2;i++)
         {

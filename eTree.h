@@ -22,33 +22,59 @@
 #define DIVIDE 4
 #define EXPONENT 5
 #define ABSOLUTE 6
-#define	SIN 7
-#define COS 8
-#define TAN 9
-#define SEC 10
-#define CSC 11
-#define COT 12
-#define LN 13
-#define SQRT 14
-#define NSQRT 15
-#define	SINH 16
-#define COSH 17
-#define TANH 18
-#define SECH 19
-#define CSCH 20
-#define COTH 21
-#define LOG 22
-#define	SINP 23
-#define COSP 24
-#define TANP 25
-#define SECP 26
-#define CSCP 27
-#define COTP 28
-#define LOG2 29
-#define POW 30
-#define FRAC 31
-#define PI 32
-#define UNKNOWNFUNC 33
+
+#define SQRT 10
+#define NSQRT 11
+#define FRAC 12
+#define PI 13
+#define SIGN 14
+#define ABSDIFF 15
+#define SIGNDIFF 16
+
+#define	SIN 20
+#define COS 21
+#define TAN 22
+#define SEC 23
+#define CSC 24
+#define COT 25
+#define	SINP 30
+#define COSP 31
+#define TANP 32
+#define SECP 33
+#define CSCP 34
+#define COTP 35
+#define	ARCSIN 40
+#define ARCCOS 41
+#define ARCTAN 42
+#define ARCSEC 43
+#define ARCCSC 44
+#define ARCCOT 45
+
+#define	SINH 50
+#define COSH 51
+#define TANH 52
+#define SECH 53
+#define CSCH 54
+#define COTH 55
+#define	SINHP 60
+#define COSHP 61
+#define TANHP 62
+#define SECHP 63
+#define CSCHP 64
+#define COTHP 65
+#define	ARCSINH 70
+#define ARCCOSH 71
+#define ARCTANH 72
+#define ARCSECH 73
+#define ARCCSCH 74
+#define ARCCOTH 75
+
+#define LN 100
+#define LOG 101
+#define LOG2 102
+#define POW 103
+
+#define UNKNOWNFUNC 200
 
 //우선순위 정의
 #define PRIORPM 6
@@ -62,6 +88,16 @@
 //숫자가 연속된 문자열도 한 글자씩 인수를 취함
 //함수의 인수가 여러 개인 경우, 마지막 인수에만 적용
 #define CONSIDERSHAPE 0x10
+
+//^ 다음 요소를 인수로 취하는 함수
+#define HASSUPERSCRIPTPARAMETER 0x20
+
+//_ 다음 요소를 인수로 취하는 함수
+#define HASSUBSCRIPTPARAMETER 0x40
+
+//옵션 변수 유무
+#define HASOPTIONALPARAMETER 0x80
+
 
 using namespace std;
 
@@ -148,7 +184,7 @@ public:
 	
 	double calculate();
 	double calculate(double value);
-	double calculate(const char* equation);
+	double calculate(const char* value);
 	eTree* differential();
 	void printTree(const char* path, const char* mode, int level);
 };
@@ -157,7 +193,7 @@ public:
 namespace expTree
 {
 
-	#define VARNUM 3
+	#define VARNUM 6
 	#define FUNCVARNUM 3
 	#define FUNCVARVALNUM 5
 
@@ -173,6 +209,9 @@ namespace expTree
 	extern double xVal;
 	extern double tVal;
 	extern double pi_2;
+	extern double aVal;
+	extern double bVal;
+	extern double cVal;
 
 	extern double *varNum[VARNUM];
 	extern double fVal[FUNCVARVALNUM];
@@ -192,8 +231,6 @@ namespace expTree
 	extern double *ln10;
 
 	extern map<double*,int> predefinedVariables;
-
-	
 
 	extern bool initialized;
 	extern int identifierType;
@@ -233,7 +270,6 @@ namespace expTree
 
 	extern double *getIdentifierPointer(int idType,string identifier);
 	extern bool validTokenCheck(vector<eTreeToken> &tokenList,int *idType);
-	extern double atof_latex(const char* str);
 	
 
 	//----수식 계산 관련----
@@ -242,14 +278,20 @@ namespace expTree
 
 	//사용자 정의 함수
 	extern bool isSameValue(double a,double b);
+	extern bool isNaN(double x);
 	extern double my_pow(double a,double b);
 	extern double my_ln(double a);
+	extern double sign(double x);
+	extern double absDiff(double x);
+	extern double signDiff(double x);
 
 	extern string operatorNameList[];
 	extern const char *tokenTypeStr[];
 };
 
-
+extern double atof_latex(const char* equation);
+extern double atof_latex(const char* equation,double value);
+extern double atof_latex(const char* equation,const char *value);
 
 typedef eTree latexEquation;
 #endif //__ETREE__

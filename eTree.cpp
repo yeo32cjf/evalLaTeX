@@ -4,7 +4,10 @@ double expTree::eVal = 2.71828182845904523536;
 double expTree::xVal = 2.0;
 double expTree::tVal = 0.0;
 double expTree::pi_2 = 3.14159265358979323846;
-double *expTree::varNum[VARNUM] = {&expTree::eVal,&expTree::xVal,&expTree::tVal};
+double expTree::aVal = 0.0;
+double expTree::bVal = 0.0;
+double expTree::cVal = 0.0;
+double *expTree::varNum[VARNUM] = {&expTree::eVal,&expTree::xVal,&expTree::tVal,&expTree::aVal,&expTree::bVal,&expTree::cVal};
 
 //함수를 수식으로 쓸 수 없으나 임의로 함숫값, 도함숫값을 알 수 있는 경우
 double expTree::fVal[FUNCVARVALNUM] = {0,};	//f(x), f'(x), f''(x), ...를 담는 변수
@@ -28,7 +31,6 @@ double *expTree::ln10 = new double(log(10.0));
 
 map<double*,int> expTree::predefinedVariables;
 
-
 bool expTree::initialized = false;
 int expTree::identifierType = CONSTONLY;
 map<string,pair<int,int>> expTree::funcByString;
@@ -37,23 +39,20 @@ map<int,pair<string,int>> expTree::stringByDef;
 void expTree::initFuncNumber()
 {
 	expTree::funcByString["\\abs"] = pair<int,int>(ABSOLUTE,1 | CONSIDERSHAPE);
-	expTree::funcByString["\\sin"] = pair<int,int>(SIN,1);
-	expTree::funcByString["\\cos"] = pair<int,int>(COS,1);
-	expTree::funcByString["\\tan"] = pair<int,int>(TAN,1);
-	expTree::funcByString["\\sec"] = pair<int,int>(SEC,1);
-	expTree::funcByString["\\csc"] = pair<int,int>(CSC,1);
-	expTree::funcByString["\\cosec"] = pair<int,int>(CSC,1);
-	expTree::funcByString["\\cot"] = pair<int,int>(COT,1);
-	expTree::funcByString["\\ln"] = pair<int,int>(LN,1);
-	expTree::funcByString["\\log"] = pair<int,int>(LOG,1);
-	expTree::funcByString["\\sqrt"] = pair<int,int>(SQRT,1 | CONSIDERSHAPE);
-	expTree::funcByString["\\nsqrt"] = pair<int,int>(NSQRT,2 | CONSIDERSHAPE);
-	expTree::funcByString["\\sinh"] = pair<int,int>(SINH,1);
-	expTree::funcByString["\\cosh"] = pair<int,int>(COSH,1);
-	expTree::funcByString["\\tanh"] = pair<int,int>(TANH,1);
-	expTree::funcByString["\\sech"] = pair<int,int>(SECH,1);
-	expTree::funcByString["\\csch"] = pair<int,int>(CSCH,1);
-	expTree::funcByString["\\coth"] = pair<int,int>(COTH,1);
+
+	expTree::funcByString["\\sqrt"] = pair<int,int>(SQRT,1 | CONSIDERSHAPE | HASOPTIONALPARAMETER);
+	expTree::funcByString["nsqrt"] = pair<int,int>(NSQRT,2 | CONSIDERSHAPE);
+	expTree::funcByString["\\frac"] = pair<int,int>(FRAC,2 | CONSIDERSHAPE);
+	expTree::funcByString["\\dfrac"] = pair<int,int>(FRAC,2 | CONSIDERSHAPE);
+	expTree::funcByString["\\pi"] = pair<int,int>(PI,0);
+
+	expTree::funcByString["\\sin"] = pair<int,int>(SIN,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\cos"] = pair<int,int>(COS,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\tan"] = pair<int,int>(TAN,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\sec"] = pair<int,int>(SEC,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\csc"] = pair<int,int>(CSC,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\cosec"] = pair<int,int>(CSC,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\cot"] = pair<int,int>(COT,1 | HASSUPERSCRIPTPARAMETER);
 
 	expTree::funcByString["\\sin^"] = pair<int,int>(SINP,2);
 	expTree::funcByString["\\cos^"] = pair<int,int>(COSP,2);
@@ -62,11 +61,40 @@ void expTree::initFuncNumber()
 	expTree::funcByString["\\csc^"] = pair<int,int>(CSCP,2);
 	expTree::funcByString["\\cosec^"] = pair<int,int>(CSCP,2);
 	expTree::funcByString["\\cot^"] = pair<int,int>(COTP,2);
+
+	expTree::funcByString["\\arcsin"] = pair<int,int>(ARCSIN,1);
+	expTree::funcByString["\\arccos"] = pair<int,int>(ARCCOS,1);
+	expTree::funcByString["\\arctan"] = pair<int,int>(ARCTAN,1);
+	expTree::funcByString["\\arcsec"] = pair<int,int>(ARCSEC,1);
+	expTree::funcByString["\\arccsc"] = pair<int,int>(ARCCSC,1);
+	expTree::funcByString["\\arccot"] = pair<int,int>(ARCCOT,1);
+
+	expTree::funcByString["\\sinh"] = pair<int,int>(SINH,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\cosh"] = pair<int,int>(COSH,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\tanh"] = pair<int,int>(TANH,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\sech"] = pair<int,int>(SECH,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\csch"] = pair<int,int>(CSCH,1 | HASSUPERSCRIPTPARAMETER);
+	expTree::funcByString["\\coth"] = pair<int,int>(COTH,1 | HASSUPERSCRIPTPARAMETER);
+
+	expTree::funcByString["\\sinh^"] = pair<int,int>(SINHP,2);
+	expTree::funcByString["\\cosh^"] = pair<int,int>(COSHP,2);
+	expTree::funcByString["\\tanh^"] = pair<int,int>(TANHP,2);
+	expTree::funcByString["\\sech^"] = pair<int,int>(SECHP,2);
+	expTree::funcByString["\\csch^"] = pair<int,int>(CSCHP,2);
+	expTree::funcByString["\\cosech^"] = pair<int,int>(CSCHP,2);
+	expTree::funcByString["\\coth^"] = pair<int,int>(COTHP,2);
+
+	expTree::funcByString["\\arcsinh"] = pair<int,int>(ARCSINH,1);
+	expTree::funcByString["\\arccosh"] = pair<int,int>(ARCCOSH,1);
+	expTree::funcByString["\\arctanh"] = pair<int,int>(ARCTANH,1);
+	expTree::funcByString["\\arcsech"] = pair<int,int>(ARCSECH,1);
+	expTree::funcByString["\\arccsch"] = pair<int,int>(ARCCSCH,1);
+	expTree::funcByString["\\arccoth"] = pair<int,int>(ARCCOTH,1);
+
+	expTree::funcByString["\\ln"] = pair<int,int>(LN,1);
+	expTree::funcByString["\\log"] = pair<int,int>(LOG,1 | HASSUBSCRIPTPARAMETER);
 	expTree::funcByString["\\log_"] = pair<int,int>(LOG2,2);
 	expTree::funcByString["\\pow"] = pair<int,int>(POW,2 | CONSIDERSHAPE);
-	expTree::funcByString["\\dfrac"] = pair<int,int>(FRAC,2 | CONSIDERSHAPE);
-	expTree::funcByString["\\frac"] = pair<int,int>(FRAC,2 | CONSIDERSHAPE);
-	expTree::funcByString["\\pi"] = pair<int,int>(PI,0);
 }
 
 void expTree::initStringByDef()
@@ -76,22 +104,22 @@ void expTree::initStringByDef()
 	expTree::stringByDef[TIMES] = pair<string,int>("*",2);
 	expTree::stringByDef[DIVIDE] = pair<string,int>("/",2);
 	expTree::stringByDef[EXPONENT] = pair<string,int>("^",2);
+
+	expTree::stringByDef[ABSOLUTE] = pair<string,int>("\\abs",1);
+	expTree::stringByDef[FRAC] = pair<string,int>("\\frac(\\dfrac)",2);
+	expTree::stringByDef[SQRT] = pair<string,int>("\\sqrt",1);
+	expTree::stringByDef[NSQRT] = pair<string,int>("nsqrt",2);
+	expTree::stringByDef[PI] = pair<string,int>("\\pi",0);
+	expTree::stringByDef[SIGN] = pair<string,int>("sign",1);
+	expTree::stringByDef[ABSDIFF] = pair<string,int>("absDiff",1);
+	expTree::stringByDef[SIGNDIFF] = pair<string,int>("signDiff",1);
+
 	expTree::stringByDef[SIN] = pair<string,int>("\\sin",1);
 	expTree::stringByDef[COS] = pair<string,int>("\\cos",1);
 	expTree::stringByDef[TAN] = pair<string,int>("\\tan",1);
 	expTree::stringByDef[SEC] = pair<string,int>("\\sec",1);
 	expTree::stringByDef[CSC] = pair<string,int>("\\csc(\\cosec)",1);
 	expTree::stringByDef[COT] = pair<string,int>("\\cot" ,1);
-	expTree::stringByDef[LN] = pair<string,int>("\\ln",1);
-	expTree::stringByDef[LOG] = pair<string,int>("\\log",1);
-	expTree::stringByDef[SQRT] = pair<string,int>("\\sqrt",1);
-	expTree::stringByDef[NSQRT] = pair<string,int>("\\nsqrt",2);
-	expTree::stringByDef[SINH] = pair<string,int>("\\sinh",1);
-	expTree::stringByDef[COSH] = pair<string,int>("\\cosh",1);
-	expTree::stringByDef[TANH] = pair<string,int>("\\tanh",1);
-	expTree::stringByDef[SECH] = pair<string,int>("\\sech",1);
-	expTree::stringByDef[CSCH] = pair<string,int>("\\csch",1);
-	expTree::stringByDef[COTH] = pair<string,int>("\\coth",1);
 
 	expTree::stringByDef[SINP] = pair<string,int>("\\sin^",2);
 	expTree::stringByDef[COSP] = pair<string,int>("\\cos^",2);
@@ -99,41 +127,74 @@ void expTree::initStringByDef()
 	expTree::stringByDef[SECP] = pair<string,int>("\\sec^",2);
 	expTree::stringByDef[CSCP] = pair<string,int>("\\csc^(\\cosec^)",2);
 	expTree::stringByDef[COTP] = pair<string,int>("\\cot^",2);
+
+	expTree::stringByDef[ARCSIN] = pair<string,int>("\\arcsin",1);
+	expTree::stringByDef[ARCCOS] = pair<string,int>("\\arccos",1);
+	expTree::stringByDef[ARCTAN] = pair<string,int>("\\arctan",1);
+	expTree::stringByDef[ARCSEC] = pair<string,int>("\\arcsec",1);
+	expTree::stringByDef[ARCCSC] = pair<string,int>("\\arccsc(\\arccosec)",1);
+	expTree::stringByDef[ARCCOT] = pair<string,int>("\\arccot" ,1);
+
+	
+	expTree::stringByDef[SINH] = pair<string,int>("\\sinh",1);
+	expTree::stringByDef[COSH] = pair<string,int>("\\cosh",1);
+	expTree::stringByDef[TANH] = pair<string,int>("\\tanh",1);
+	expTree::stringByDef[SECH] = pair<string,int>("\\sech",1);
+	expTree::stringByDef[CSCH] = pair<string,int>("\\csch",1);
+	expTree::stringByDef[COTH] = pair<string,int>("\\coth",1);
+
+	expTree::stringByDef[SINH] = pair<string,int>("\\sinh^",2);
+	expTree::stringByDef[COSH] = pair<string,int>("\\cosh^",2);
+	expTree::stringByDef[TANH] = pair<string,int>("\\tanh^",2);
+	expTree::stringByDef[SECH] = pair<string,int>("\\sech^",2);
+	expTree::stringByDef[CSCH] = pair<string,int>("\\csch^(\\cosech^)",2);
+	expTree::stringByDef[COTH] = pair<string,int>("\\coth^",2);
+
+	expTree::stringByDef[ARCSINH] = pair<string,int>("\\arcsinh",1);
+	expTree::stringByDef[ARCCOSH] = pair<string,int>("\\arccosh",1);
+	expTree::stringByDef[ARCTANH] = pair<string,int>("\\arctanh",1);
+	expTree::stringByDef[ARCSECH] = pair<string,int>("\\arcsech",1);
+	expTree::stringByDef[ARCCSCH] = pair<string,int>("\\arccsch",1);
+	expTree::stringByDef[ARCCOTH] = pair<string,int>("\\arccoth",1);
+
+	expTree::stringByDef[LN] = pair<string,int>("\\ln",1);
+	expTree::stringByDef[LOG] = pair<string,int>("\\log",1);
 	expTree::stringByDef[LOG2] = pair<string,int>("\\log_",2);
 	expTree::stringByDef[POW] = pair<string,int>("\\pow",2);
-	expTree::stringByDef[FRAC] = pair<string,int>("\\frac(\\dfrac)",2);
 
-	expTree::stringByDef[PI] = pair<string,int>("\\pi",0);
 }
 
 void expTree::initPredefinedVariables()
 {
-	predefinedVariables[&expTree::eVal] = 0;
-	predefinedVariables[&expTree::xVal] = 0;
-	predefinedVariables[&expTree::tVal] = 0;
-	predefinedVariables[&expTree::pi_2] = 0;
+	expTree::predefinedVariables[&expTree::eVal] = 0;
+	expTree::predefinedVariables[&expTree::xVal] = 0;
+	expTree::predefinedVariables[&expTree::tVal] = 0;
+	expTree::predefinedVariables[&expTree::pi_2] = 0;
+	expTree::predefinedVariables[&expTree::aVal] = 0;
+	expTree::predefinedVariables[&expTree::bVal] = 0;
+	expTree::predefinedVariables[&expTree::cVal] = 0;
 	
-	predefinedVariables[&expTree::fVal[0]]=0;
-	predefinedVariables[&expTree::fVal[1]]=0;
-	predefinedVariables[&expTree::fVal[2]]=0;
-	predefinedVariables[&expTree::fVal[3]]=0;
-	predefinedVariables[&expTree::fVal[4]]=0;
-	predefinedVariables[&expTree::gVal[0]]=0;
-	predefinedVariables[&expTree::gVal[1]]=0;
-	predefinedVariables[&expTree::gVal[2]]=0;
-	predefinedVariables[&expTree::gVal[3]]=0;
-	predefinedVariables[&expTree::gVal[4]]=0;
-	predefinedVariables[&expTree::hVal[0]]=0;
-	predefinedVariables[&expTree::hVal[1]]=0;
-	predefinedVariables[&expTree::hVal[2]]=0;
-	predefinedVariables[&expTree::hVal[3]]=0;
-	predefinedVariables[&expTree::hVal[4]]=0;
+	expTree::predefinedVariables[&expTree::fVal[0]]=0;
+	expTree::predefinedVariables[&expTree::fVal[1]]=0;
+	expTree::predefinedVariables[&expTree::fVal[2]]=0;
+	expTree::predefinedVariables[&expTree::fVal[3]]=0;
+	expTree::predefinedVariables[&expTree::fVal[4]]=0;
+	expTree::predefinedVariables[&expTree::gVal[0]]=0;
+	expTree::predefinedVariables[&expTree::gVal[1]]=0;
+	expTree::predefinedVariables[&expTree::gVal[2]]=0;
+	expTree::predefinedVariables[&expTree::gVal[3]]=0;
+	expTree::predefinedVariables[&expTree::gVal[4]]=0;
+	expTree::predefinedVariables[&expTree::hVal[0]]=0;
+	expTree::predefinedVariables[&expTree::hVal[1]]=0;
+	expTree::predefinedVariables[&expTree::hVal[2]]=0;
+	expTree::predefinedVariables[&expTree::hVal[3]]=0;
+	expTree::predefinedVariables[&expTree::hVal[4]]=0;
 
-	predefinedVariables[expTree::zero] = 0;
-	predefinedVariables[expTree::one] = 0;
-	predefinedVariables[expTree::minusone] = 0;
-	predefinedVariables[expTree::two] = 0;
-	predefinedVariables[expTree::ln10] = 0;
+	expTree::predefinedVariables[expTree::zero] = 0;
+	expTree::predefinedVariables[expTree::one] = 0;
+	expTree::predefinedVariables[expTree::minusone] = 0;
+	expTree::predefinedVariables[expTree::two] = 0;
+	expTree::predefinedVariables[expTree::ln10] = 0;
 }
 
 //하위 4비트: e, x, t,  상위 4비트: f, g, h
@@ -385,16 +446,18 @@ int expTree::getTokenList(vector<eTreeToken> &tokenList,const char *buf)
 		{
 			string tokenString = string(buf+tokenStart,buf+tokenEnd);
 			state = eParseState::eParseStart;
+			bool changePrevTok = false;
 
 			if(tokenString == "^")
 			{
 				if(prevTok)
 				{
-					if(*prevTok == "\\sin" || *prevTok == "\\cos" || *prevTok == "\\tan" || *prevTok == "\\sec" || *prevTok == "\\csc" || *prevTok == "\\cosec" || *prevTok == "\\cot"
-					 || *prevTok == "\\sinh" || *prevTok == "\\cosh" || *prevTok == "\\tanh" || *prevTok == "\\sech" || *prevTok == "\\csch" || *prevTok == "\\cosech" || *prevTok == "\\coth")
+					if(funcByString[*prevTok].second & HASSUPERSCRIPTPARAMETER)
+					//if(*prevTok == "\\sin" || *prevTok == "\\cos" || *prevTok == "\\tan" || *prevTok == "\\sec" || *prevTok == "\\csc" || *prevTok == "\\cosec" || *prevTok == "\\cot"
+					// || *prevTok == "\\sinh" || *prevTok == "\\cosh" || *prevTok == "\\tanh" || *prevTok == "\\sech" || *prevTok == "\\csch" || *prevTok == "\\cosech" || *prevTok == "\\coth")
 					{
 						*prevTok += "^";
-						continue;
+						changePrevTok = true;
 					}
 				}
 			}
@@ -402,10 +465,11 @@ int expTree::getTokenList(vector<eTreeToken> &tokenList,const char *buf)
 			{
 				if(prevTok)
 				{
-					if(*prevTok == "\\log")
+					if(funcByString[*prevTok].second & HASSUBSCRIPTPARAMETER)
+					//if(*prevTok == "\\log")
 					{
 						*prevTok += "_";
-						continue;
+						changePrevTok = true;
 					}
 				}
 			}
@@ -413,22 +477,33 @@ int expTree::getTokenList(vector<eTreeToken> &tokenList,const char *buf)
 			{
 				if(prevTok)
 				{
-					if(*prevTok == "\\sqrt")
+					if(funcByString[*prevTok].second & HASOPTIONALPARAMETER)
+					//if(*prevTok == "\\sqrt")
 					{
-						*prevTok = "\\nsqrt";
-						//continue;
+						(*prevTok)[0] = 'n';
 					}
 				}
 			}
 
-			if(funcByString.find(tokenString) != funcByString.end())
+			if(changePrevTok)
 			{
-				parameterNum.back() = (funcByString[tokenString].second & 0x0F);
-				parameterType.back() = (funcByString[tokenString].second & CONSIDERSHAPE);
+				if(funcByString.find(*prevTok) != funcByString.end())
+				{
+					parameterNum.back() = (funcByString[*prevTok].second & 0x0F);
+					parameterType.back() = (funcByString[*prevTok].second & CONSIDERSHAPE);
+				}
 			}
+			else
+			{
+				if(funcByString.find(tokenString) != funcByString.end())
+				{
+					parameterNum.back() = (funcByString[tokenString].second & 0x0F);
+					parameterType.back() = (funcByString[tokenString].second & CONSIDERSHAPE);
+				}
 
-			tokenList.emplace_back(eTreeToken(tokenType,tokenString));
-			prevTok = &tokenList.back().name;
+				tokenList.emplace_back(eTreeToken(tokenType,tokenString));
+				prevTok = &tokenList.back().name;
+			}
 		}
 	}
 
@@ -577,6 +652,12 @@ double *expTree::getIdentifierPointer(int idType,string identifier)
 		return ((idType & 0x02) ? &expTree::xVal : NULL);
 	else if(identifier == "t") 
 		return ((idType & 0x04) ? &expTree::tVal : NULL);
+	else if(identifier == "a")
+		return &expTree::aVal;
+	else if(identifier == "b")
+		return &expTree::bVal;
+	else if(identifier == "c")
+		return &expTree::cVal;
 	else if(identifier == "f") 
 		return ((idType & 0x10) ? &expTree::fVal[0] : NULL);
 	else if(identifier == "g") 
@@ -648,11 +729,22 @@ void expTree::SetValue(const char* identifier, double value)
 		expTree::xVal = value;
 	else if (strcmp(identifier, "t") == 0)
 		expTree::tVal = value;
+	else if (strcmp(identifier, "a") == 0)
+		expTree::aVal = value;
+	else if (strcmp(identifier, "b") == 0)
+		expTree::bVal = value;
+	else if (strcmp(identifier, "c") == 0)
+		expTree::cVal = value;
 }
 
 bool expTree::isSameValue(double a,double b)
 {
 	return (a-b<0.000001 && b-a<0.000001);
+}
+
+bool expTree::isNaN(double x)
+{
+	return (x!=x);
 }
 
 double expTree::my_pow(double a,double b)
@@ -694,20 +786,72 @@ double expTree::my_ln(double a)
 		return 0;
 }
 
+double expTree::sign(double x)
+{
+	if(expTree::isSameValue(x,0))
+		return 0;
+	else if(x>0)
+		return 1;
+	else
+		return -1;
+}
+
+double expTree::absDiff(double x)
+{
+	if(expTree::isSameValue(x,0))
+		return NAN;
+	else if(x>0)
+		return 1;
+	else
+		return -1;
+}
+
+double expTree::signDiff(double x)
+{
+	if(expTree::isSameValue(x,0))
+		return NAN;
+	else
+		return 0;
+}
+
 
 bool lastCalculateSucceed = false;
 
-double atof_latex(const char* str)
+double atof_latex(const char* function)
 {
 	double res = 0;
-	eTree* tree = new eTree(str);
+	eTree* tree = new eTree;
+	tree->setIdentifierType(CONSTONLY);
+	tree->parse(function);
 
-	res = tree->calculate();
+	if(tree->parseSuccess)
+	{
+		res = tree->calculate();
+	}
 
 	delete tree;
 	return res;
 }
 
+double atof_latex(const char* function,double value)
+{
+	double res = 0;
+	eTree* tree = new eTree;
+	tree->parse(function);
+
+	if(tree->parseSuccess)
+	{
+		res = tree->calculate(value);
+	}
+
+	delete tree;
+	return res;
+}
+
+double atof_latex(const char* function,const char *value)
+{
+	return atof_latex(function,atof_latex(value));
+}
 
 // 시험용 코드
 
@@ -1029,6 +1173,36 @@ double *eTree::calc()
 			*res = abs(*parameter[0]->calc());
 			break;
 
+
+		case SQRT:	//sqrt함수
+			*res = sqrt(*parameter[0]->calc());
+			break;
+			
+		case NSQRT:	//sqrt함수
+			*res = pow(*parameter[1]->calc(),1.0/(*parameter[0]->calc()));
+			break;
+
+		case FRAC:	//dfrac
+			*res = (*parameter[0]->calc()) / (*parameter[1]->calc());
+			break;
+
+		case PI:	//pi
+			*res = expTree::pi_2;
+			break;
+
+		case SIGN:	//sqrt함수
+			*res = expTree::sign(*parameter[0]->calc());
+			break;
+
+		case ABSDIFF:	//sqrt함수
+			*res = expTree::absDiff(*parameter[0]->calc());
+			break;
+
+		case SIGNDIFF:	//sqrt함수
+			*res = expTree::signDiff(*parameter[0]->calc());
+			break;
+
+
 		case SIN:	//사인
 			*res = sin(*parameter[0]->calc());
 			break;
@@ -1051,46 +1225,6 @@ double *eTree::calc()
 
 		case COT:	//코탄젠트
 			*res = 1/tan(*parameter[0]->calc());
-			break;
-
-		case LN:	//자연로그
-			*res = expTree::my_ln(*parameter[0]->calc());
-			break;
-
-		case SQRT:	//sqrt함수
-			*res = sqrt(*parameter[0]->calc());
-			break;
-			
-		case NSQRT:	//sqrt함수
-			*res = pow(*parameter[1]->calc(),1.0/(*parameter[0]->calc()));
-			break;
-
-		case SINH:	//sinh함수
-			*res = sinh(*parameter[0]->calc());
-			break;
-
-		case COSH:	//cosh함수
-			*res = cosh(*parameter[0]->calc());
-			break;
-
-		case TANH:	//tanh함수
-			*res = tanh(*parameter[0]->calc());
-			break;
-
-		case SECH:	//sech함수
-			*res = 1/cosh(*parameter[0]->calc());
-			break;
-
-		case CSCH:	//csch함수
-			*res = 1/sinh(*parameter[0]->calc());
-			break;
-
-		case COTH:	//coth함수
-			*res = 1/tanh(*parameter[0]->calc());
-			break;
-
-		case LOG:	//상용로그
-			*res = expTree::my_ln(*parameter[0]->calc())/(*expTree::ln10);
 			break;
 
 		case SINP:
@@ -1117,20 +1251,122 @@ double *eTree::calc()
 			*res = expTree::my_pow(1/tan(*parameter[1]->calc()),*parameter[0]->calc());
 			break;
 
+		case ARCSIN:
+			*res = asin(*parameter[0]->calc());
+			break;
+
+		case ARCCOS:
+			*res = acos(*parameter[0]->calc());
+			break;
+
+		case ARCTAN:
+			*res = atan(*parameter[0]->calc());
+			break;
+
+		case ARCSEC:
+			*res = acos(1/(*parameter[0]->calc()));
+			break;
+
+		case ARCCSC:
+			*res = asin(1/(*parameter[0]->calc()));
+			break;
+
+		case ARCCOT:
+			{double tmpVal = *parameter[0]->calc();
+			if(tmpVal>0)
+				*res = atan(1/tmpVal);
+			else
+				*res = atan(1/tmpVal)+expTree::pi_2;}
+			break;
+
+
+		case SINH:	//sinh함수
+			*res = sinh(*parameter[0]->calc());
+			break;
+
+		case COSH:	//cosh함수
+			*res = cosh(*parameter[0]->calc());
+			break;
+
+		case TANH:	//tanh함수
+			*res = tanh(*parameter[0]->calc());
+			break;
+
+		case SECH:	//sech함수
+			*res = 1/cosh(*parameter[0]->calc());
+			break;
+
+		case CSCH:	//csch함수
+			*res = 1/sinh(*parameter[0]->calc());
+			break;
+
+		case COTH:	//coth함수
+			*res = 1/tanh(*parameter[0]->calc());
+			break;
+
+		case SINHP:
+			*res = expTree::my_pow(sinh(*parameter[1]->calc()),*parameter[0]->calc());
+			break;
+
+		case COSHP:
+			*res = expTree::my_pow(cosh(*parameter[1]->calc()),*parameter[0]->calc());
+			break;
+
+		case TANHP:
+			*res = expTree::my_pow(tanh(*parameter[1]->calc()),*parameter[0]->calc());
+			break;
+
+		case SECHP:
+			*res = expTree::my_pow(1/cosh(*parameter[1]->calc()),*parameter[0]->calc());
+			break;
+
+		case CSCHP:
+			*res = expTree::my_pow(1/sinh(*parameter[1]->calc()),*parameter[0]->calc());
+			break;
+
+		case COTHP:
+			*res = expTree::my_pow(1/tanh(*parameter[1]->calc()),*parameter[0]->calc());
+			break;
+
+		case ARCSINH:	//sinh함수
+			*res = asinh(*parameter[0]->calc());
+			break;
+
+		case ARCCOSH:	//cosh함수
+			*res = acosh(*parameter[0]->calc());
+			break;
+
+		case ARCTANH:	//tanh함수
+			*res = atanh(*parameter[0]->calc());
+			break;
+
+		case ARCSECH:	//sech함수
+			*res = acosh(1/(*parameter[0]->calc()));
+			break;
+
+		case ARCCSCH:	//csch함수
+			*res = asinh(1/(*parameter[0]->calc()));
+			break;
+
+		case ARCCOTH:	//coth함수
+			*res = atanh(1/(*parameter[0]->calc()));
+			break;
+
+
+		case LN:	//자연로그
+			*res = expTree::my_ln(*parameter[0]->calc());
+			break;
+
+		case LOG:	//상용로그
+			*res = expTree::my_ln(*parameter[0]->calc())/(*expTree::ln10);
+			break;
+
 		case LOG2:
 			*res = expTree::my_ln(*parameter[1]->calc())/expTree::my_ln(*parameter[0]->calc());
 			break;
 
 		case POW:	//지수
 			*res = expTree::my_pow(*parameter[0]->calc() , *parameter[1]->calc());
-			break;
-
-		case FRAC:	//dfrac
-			*res = (*parameter[0]->calc()) / (*parameter[1]->calc());
-			break;
-
-		case PI:	//pi
-			*res = expTree::pi_2;
 			break;
 
 		default:
@@ -1177,9 +1413,9 @@ double eTree::calculate(double value)
 	return res;
 }
 
-double eTree::calculate(const char *equation)
+double eTree::calculate(const char *value)
 {
-	eTree* eq = new eTree(equation);
+	eTree* eq = new eTree(value);
 	eq->setIdentifierType(CONSTONLY);
 	double result = this->calculate(eq->calculate());
 
@@ -1208,7 +1444,7 @@ bool eTree::simplify(double *var)
 			}
 		}
 	}
-
+	
 	if(res == true)
 	{
 		if(parameter.size() == 1)
@@ -1489,6 +1725,7 @@ eTree *eTree::differential(double *var)
 	}
 	else if(priority != -1)		//연산자인 경우
 	{
+		printf("operatorType:%d\n",operatorType);
 		switch(operatorType)
 		{
 		case PLUS:	//덧셈
@@ -1556,7 +1793,7 @@ eTree *eTree::differential(double *var)
 			tmp->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
 
 			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(this);
+			tmp->parameter.emplace_back(this->deepCopyTree());
 			tmp->parameter.emplace_back(parameter[1]->differential(var));
 
 			tmp = res->parameter[1];
@@ -1578,110 +1815,16 @@ eTree *eTree::differential(double *var)
 			break;
 
 		case ABSOLUTE:	//절댓값
-
-			break;
-
-		case SIN:	//사인
 			res->val = NULL;
 			res->operatorType = TIMES;
-			res->priority = plev*PRIORLEVEL+PRIORMD;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));
-			res->parameter.emplace_back(parameter[0]->differential(var));
-			res->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
-			break;
-
-		case COS:	//코사인
-			res->val = NULL;
-			res->operatorType = TIMES;
-			res->priority = plev*PRIORLEVEL+PRIORMD;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(expTree::minusone,plev*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SIN,1,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
-			break;
-
-		case TAN:	//탄젠트
-			res->val = NULL;
-			res->operatorType = TIMES;
-			res->priority = plev*PRIORLEVEL+PRIORMD;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));
-			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter.emplace_back(tmp->parameter[0]);
-
-			break;
-
-		case SEC:	//시컨트
-			res->val = NULL;
-			res->operatorType = TIMES;
-			res->priority = plev*PRIORLEVEL+PRIORMD;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,TAN,1,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));
-			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
-
-			break;
-
-		case CSC:	//코시컨트
-			res->val = NULL;
-			res->operatorType = TIMES;
-			res->priority = plev*PRIORLEVEL+PRIORMD;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(expTree::minusone,plev*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COT,1,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));
-			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
-
-			break;
-
-		case COT:	//코탄젠트
-			res->val = NULL;
-			res->operatorType = TIMES;
-			res->priority = plev*PRIORLEVEL+PRIORMD;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(expTree::minusone,plev*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));
-			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter.emplace_back(tmp->parameter[0]);
-
-			break;
-
-		case LN:	//자연로그
-			res->val = NULL;
-			res->operatorType = DIVIDE;
 			res->priority = plev*PRIORLEVEL+PRIORMD;
 			res->maxPNum = 2;
 			res->parameter.emplace_back(parameter[0]->differential(var));
-			res->parameter.emplace_back(parameter[0]->deepCopyTree());
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,ABSDIFF,1,identifierType));
+			res->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
 			break;
+
+
 
 		case SQRT:	//sqrt함수
 			res->val = NULL;
@@ -1752,6 +1895,545 @@ eTree *eTree::differential(double *var)
 			tmp->parameter.emplace_back(new eTree(expTree::one,plev*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
 			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
 
+			break;
+		
+		case FRAC:	//dfrac
+			res->val = NULL;
+			res->operatorType = DIVIDE;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->differential(var));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter[1]->parameter.emplace_back(parameter[1]->differential(var));
+			res->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			res->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case PI:	//pi
+			res->val = expTree::zero;
+			res->operatorType = NUMBER;
+			res->priority = plev*PRIORLEVEL + PRIORNUM;
+			res->maxPNum = 0;
+			break;
+
+		case SIGN:	//부호 함수
+		case ABSDIFF:
+		case SIGNDIFF:
+			res->val = NULL;
+			res->operatorType = SIGNDIFF;
+			res->priority = plev*PRIORLEVEL+PRIORFUNC;
+			res->maxPNum = 1;
+			res->parameter.emplace_back(parameter[0]->deepCopyTree());
+			break;
+
+
+		case SIN:	//사인
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));
+			res->parameter.emplace_back(parameter[0]->differential(var));
+			res->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+			break;
+
+		case COS:	//코사인
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(expTree::minusone,plev*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SIN,1,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+			break;
+
+		case TAN:	//탄젠트
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(tmp->parameter[0]->deepCopyTree());
+
+			break;
+
+		case SEC:	//시컨트
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,TAN,1,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			break;
+
+		case CSC:	//코시컨트
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(expTree::minusone,plev*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COT,1,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			break;
+
+		case COT:	//코탄젠트
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(expTree::minusone,plev*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(tmp->parameter[0]->deepCopyTree());
+
+			break;
+
+		case SINP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SIN,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SIN,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수의 도함수
+			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			break;
+
+		case COSP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SIN,1,identifierType));	//원래 함수의 도함수
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			break;
+
+		case TANP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,TAN,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,TAN,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));	//원래 함수의 도함수
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case SECP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,TAN,1,identifierType));	//원래 함수의 도함수
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case CSCP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));	//원래 함수의 도함수
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COT,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case COTP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COT,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COT,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));	//원래 함수의 도함수
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case ARCSIN:
+			res->val = NULL;
+			res->operatorType = DIVIDE;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(parameter[0]->differential(var));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SQRT,1,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCCOS:
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,DIVIDE,2,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SQRT,1,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCTAN:
+			res->val = NULL;
+			res->operatorType = DIVIDE;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(parameter[0]->differential(var));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,PLUS,2,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCSEC:
+			res->val = NULL;
+			res->operatorType = DIVIDE;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(parameter[0]->differential(var));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,ABSOLUTE,1,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SQRT,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCCSC:
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,DIVIDE,2,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,ABSOLUTE,1,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SQRT,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCCOT:
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,DIVIDE,2,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,PLUS,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
 			break;
 
 			
@@ -1856,6 +2538,403 @@ eTree *eTree::differential(double *var)
 
 			break;
 
+		case SINHP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SINH,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SINH,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COSH,1,identifierType));	//원래 함수의 도함수
+			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			break;
+
+		case COSHP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COSH,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COSH,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SINH,1,identifierType));	//원래 함수의 도함수
+			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			break;
+
+		case TANHP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev * PRIORLEVEL + PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL, (plev + 1) * PRIORLEVEL + PRIORMD, TIMES, 2, identifierType));
+			res->parameter.emplace_back(new eTree(NULL, (plev + 1) * PRIORLEVEL + PRIORMD, TIMES, 2, identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIORMD, TIMES, 2, identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIORFUNC, LN, 1, identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIORFUNC, TANH, 1, identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIORMD, TIMES, 2, identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIOREXP, EXPONENT, 2, identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIORMD, TIMES, 2, identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIORFUNC, TANH, 1, identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL, (plev + 1) * PRIORLEVEL + PRIORPM, MINUS, 2, identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one, (plev + 1) * PRIORLEVEL + PRIORNUM, NUMBER, 0, identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIOREXP, EXPONENT, 2, identifierType));//원래 함수의 도함수
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL, plev * PRIORLEVEL + PRIORFUNC, SECH, 1, identifierType));
+			tmp->parameter.emplace_back(new eTree(expTree::two, (plev + 1) * PRIORLEVEL + PRIORNUM, NUMBER, 0, identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case SECHP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SECH,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SECH,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));	//원래 함수의 도함수
+			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SECH,1,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,TANH,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case CSCHP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSCH,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSCH,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));	//원래 함수의 도함수
+			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSCH,1,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COTH,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case COTHP:
+			res->val = NULL;
+			res->operatorType = PLUS;
+			res->priority = plev*PRIORLEVEL+PRIORPM;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = res->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
+			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COTH,1,identifierType));	//원래 함수
+			tmp->parameter[1]->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(this->deepCopyTree());
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COTH,1,identifierType));	//원래 함수 
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = res->parameter[1]->parameter[0]->parameter[1];
+			tmp->parameter.emplace_back(parameter[1]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));	//원래 함수의 도함수
+			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSCH,1,identifierType));
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
+			break;
+
+		case ARCSINH:
+			res->val = NULL;
+			res->operatorType = DIVIDE;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(parameter[0]->differential(var));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SQRT,1,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,PLUS,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCCOSH:
+			res->val = NULL;
+			res->operatorType = DIVIDE;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(parameter[0]->differential(var));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SQRT,1,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCTANH:
+		case ARCCOTH:
+			res->val = NULL;
+			res->operatorType = DIVIDE;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(parameter[0]->differential(var));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCSECH:
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,DIVIDE,2,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SQRT,1,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+		case ARCCSCH:
+			res->val = NULL;
+			res->operatorType = TIMES;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			res->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,DIVIDE,2,identifierType));
+
+			tmp = res->parameter[1];
+			tmp->parameter.emplace_back(parameter[0]->differential(var));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,ABSOLUTE,1,identifierType));
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SQRT,1,identifierType));
+			tmp->parameter[0]->parameter.emplace_back(parameter[0]->deepCopyTree());
+
+			tmp = tmp->parameter[1];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORPM,PLUS,2,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
+			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+
+			tmp = tmp->parameter[0];
+			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
+			tmp->parameter.emplace_back(new eTree(expTree::two,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
+			break;
+
+
+		case LN:	//자연로그
+			res->val = NULL;
+			res->operatorType = DIVIDE;
+			res->priority = plev*PRIORLEVEL+PRIORMD;
+			res->maxPNum = 2;
+			res->parameter.emplace_back(parameter[0]->differential(var));
+			res->parameter.emplace_back(parameter[0]->deepCopyTree());
+			break;
+
 		case LOG:	//상용로그
 			res->val = NULL;
 			res->operatorType = DIVIDE;
@@ -1867,281 +2946,7 @@ eTree *eTree::differential(double *var)
 			res->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
 			res->parameter[1]->parameter.emplace_back(new eTree(expTree::ln10,plev*PRIORLEVEL+PRIORNUM,NUMBER,1,identifierType));
 			break;
-
-		case SINP:
-			res->val = NULL;
-			res->operatorType = PLUS;
-			res->priority = plev*PRIORLEVEL+PRIORPM;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
-			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SIN,1,identifierType));	//원래 함수
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(this);
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = res->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SIN,1,identifierType));	//원래 함수 
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			tmp = res->parameter[1]->parameter[0]->parameter[1];
-			tmp->parameter.emplace_back(parameter[1]->differential(var));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수의 도함수
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-
-			break;
-
-		case COSP:
-			res->val = NULL;
-			res->operatorType = PLUS;
-			res->priority = plev*PRIORLEVEL+PRIORPM;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
-			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(this);
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = res->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수 
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			tmp = res->parameter[1]->parameter[0]->parameter[1];
-			tmp->parameter.emplace_back(parameter[1]->differential(var));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SIN,1,identifierType));	//원래 함수의 도함수
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			break;
-
-		case TANP:
-			res->val = NULL;
-			res->operatorType = PLUS;
-			res->priority = plev*PRIORLEVEL+PRIORPM;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
-			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(this);
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = res->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수 
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			tmp = res->parameter[1]->parameter[0]->parameter[1];
-			tmp->parameter.emplace_back(parameter[1]->differential(var));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));	//원래 함수의 도함수
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			break;
-
-		case SECP:
-			res->val = NULL;
-			res->operatorType = PLUS;
-			res->priority = plev*PRIORLEVEL+PRIORPM;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
-			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(this);
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = res->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수 
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			tmp = res->parameter[1]->parameter[0]->parameter[1];
-			tmp->parameter.emplace_back(parameter[1]->differential(var));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,TAN,1,identifierType));	//원래 함수의 도함수
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,SEC,1,identifierType));
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			break;
-
-		case CSCP:
-			res->val = NULL;
-			res->operatorType = PLUS;
-			res->priority = plev*PRIORLEVEL+PRIORPM;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
-			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(this);
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = res->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수 
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			tmp = res->parameter[1]->parameter[0]->parameter[1];
-			tmp->parameter.emplace_back(parameter[1]->differential(var));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-			
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));	//원래 함수의 도함수
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COT,1,identifierType));
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			break;
-
-		case COTP:
-			res->val = NULL;
-			res->operatorType = PLUS;
-			res->priority = plev*PRIORLEVEL+PRIORPM;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,LN,1,identifierType));
-			tmp->parameter[1]->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(this);
-			tmp->parameter.emplace_back(parameter[0]->differential(var));
-
-			tmp = res->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIOREXP,EXPONENT,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,COS,1,identifierType));	//원래 함수 
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter.emplace_back(new eTree(expTree::one,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-
-			tmp = res->parameter[1]->parameter[0]->parameter[1];
-			tmp->parameter.emplace_back(parameter[1]->differential(var));
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = tmp->parameter[1];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(expTree::minusone,(plev+1)*PRIORLEVEL+PRIORNUM,NUMBER,0,identifierType));
-			
-			tmp = tmp->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));	//원래 함수의 도함수
-			tmp->parameter.emplace_back(new eTree(NULL,plev*PRIORLEVEL+PRIORFUNC,CSC,1,identifierType));
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			break;
-
+		
 		case LOG2:	//밑이 있는 로그
 			res->val = NULL;
 			res->operatorType = DIVIDE;
@@ -2181,32 +2986,7 @@ eTree *eTree::differential(double *var)
 
 			break;
 
-		case FRAC:	//dfrac
-			res->val = NULL;
-			res->operatorType = DIVIDE;
-			res->priority = plev*PRIORLEVEL+PRIORMD;
-			res->maxPNum = 2;
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORPM,MINUS,2,identifierType));
-			res->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp = res->parameter[0];
-			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-			tmp->parameter.emplace_back(new eTree(NULL,(plev+1)*PRIORLEVEL+PRIORMD,TIMES,2,identifierType));
-
-			tmp->parameter[0]->parameter.emplace_back(parameter[0]->differential(var));
-			tmp->parameter[0]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			tmp->parameter[1]->parameter.emplace_back(parameter[0]->deepCopyTree());
-			tmp->parameter[1]->parameter.emplace_back(parameter[1]->differential(var));
-			res->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			res->parameter[1]->parameter.emplace_back(parameter[1]->deepCopyTree());
-			break;
-
-		case PI:	//pi
-			res->val = expTree::zero;
-			res->operatorType = NUMBER;
-			res->priority = plev*PRIORLEVEL + PRIORNUM;
-			res->maxPNum = 0;
-			break;
+		
 
 		}
 	}
@@ -2219,7 +2999,6 @@ eTree *eTree::differential(double *var)
 		res->parameter.emplace_back(parameter[0]->differential(var));
 	}
 		
-
 	res->simplify(var);
 	
 	return res;
@@ -2240,17 +3019,23 @@ void eTree::printTree(const char* path, const char* mode, int level)
 	else if (this->operatorType == NUMBER)
 	{
 		if (this->val == &expTree::xVal)
-			fprintf(fp, "value: x\n");
+			fprintf(fp, "variable: x\n");
 		else if (this->val == &expTree::tVal)
-			fprintf(fp, "value: t\n");
+			fprintf(fp, "variable: t\n");
 		else if (this->val == &expTree::eVal)
-			fprintf(fp, "value: e\n");
+			fprintf(fp, "constant: e(%f)\n",expTree::eVal);
+		else if (this->val == &expTree::aVal)
+			fprintf(fp, "constant: a(%f)\n",expTree::aVal);
+		else if (this->val == &expTree::bVal)
+			fprintf(fp, "constant: b(%f)\n",expTree::bVal);
+		else if (this->val == &expTree::cVal)
+			fprintf(fp, "constant: c(%f)\n",expTree::cVal);
 		else
-			fprintf(fp, "value: %f\n", *(this->val));
+			fprintf(fp, "constant: %f\n", *(this->val));
 	}
 
 	else
-		fprintf(fp, "operator: %s, priority: %d, maxPNum: %d, memory:0x%p\n", expTree::operatorNameList[this->operatorType - 1].data(), this->priority, this->maxPNum, this);
+		fprintf(fp, "operator: %s, priority: %d, maxPNum: %d, memory:0x%p\n", expTree::stringByDef[this->operatorType].first.data(), this->priority, this->maxPNum, this);
 
 	fclose(fp);
 
