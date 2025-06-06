@@ -1725,7 +1725,7 @@ eTree *eTree::differential(double *var)
 	}
 	else if(priority != -1)		//연산자인 경우
 	{
-		printf("operatorType:%d\n",operatorType);
+		//printf("operatorType:%d\n",operatorType);
 		switch(operatorType)
 		{
 		case PLUS:	//덧셈
