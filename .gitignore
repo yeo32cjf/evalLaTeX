@@ -1,3 +1,6 @@
 eTree_rest.cpp
 eTree_rest.h
 .vscode
+*.exe
+*.o
+*.txt
