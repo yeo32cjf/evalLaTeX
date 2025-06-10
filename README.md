@@ -10,7 +10,7 @@ Calculates the value of an equation written in LaTeX.
 This example shows how to make a function from LaTeX equation code.
 Then calculate a value of a function.
 
-1. For $f(x)=x\sin x$, caluelate $f(2)$ and $f\left( \dfrac{\pi}{12} \right) $
+1. For $f(x)=x\sin 2x$, caluelate $f(2)$ and $f\left( \dfrac{\pi}{12} \right) $
 ```C++
 latexEquation* f = new latexEquation("x\\sin2x");    // f(x)=x*sin2x
 double f1 = f->calculate(2);    //f1 = -1.5136 (=2sin4)
@@ -49,13 +49,27 @@ evalLaTeX can parse operators below.
 
 evalLaTeX can parse LaTeX Functions below.
 ```LaTeX
-\sin, \cos, \tan, \sec, \csc(\cosec), \cot",
-\sin^, \cos^, \tan^, \sec^, \csc^(\cosec^), \cot^,
+\sin, \cos, \tan, \sec, \csc, \cosec, \cot,
+\sin^, \cos^, \tan^, \sec^, \csc^, \cosec^, \cot^,
+\arcsin, \arccos, \arctan, \arcsec, \arccsc, \arccot,
 \sinh, \cosh, \tanh, \sech, \csch, \coth,
-\ln, \log, \sqrt, \log_, \pow, \frac(\dfrac), \pi
+\sinh^, \cosh^, \tanh^, \sech^, \csch^, \cosech^, \coth^,
+\arcsinh, \arccosh, \arctanh, \arcsech, \arccsch, \arccoth,
+\ln, \log, \sqrt, \log_, \pow, \frac, \dfrac, \pi
 ```
-Inverse trigonometric functions will be supported later.
+Trigonometric functions, hyperbolic functions and their inverse functions are supported.
+Logarithm, Power, Root and Fraction are also supported.
+<br>
 
+evalLaTeX parses $a$, $b$, $c$, $e$ as constant. 
+value of $a$, $b$ and $c$ can be changed by expTree::SetValue function like below.
+```C++
+expTree::SetValue("a", "4");             // set a = 4
+expTree::SetValue("b", 3.6);             // set b = 3.6
+expTree::SetValue("c", "4+3\\pi");       // set c = 4+3pi
+double x = atof_latex("a+b+c");          // x = a+b+c = 11.6+3pi = 21.0248
+```
+value of $e$ is fixed to $\lim_{x \to 0}\left(1+x  \right)^{\frac{1}{x}} = 2.71828...$ and cannot be changed.
 
 ## Available Methods and Variables
 Methods of a class latexEquation.
@@ -68,13 +82,9 @@ Default Constructor
 <br><br>
 ```C++
 latexEquation(double n);
-```
-Constructor with real number n. Object will be calculated to n.
-<br><br>
-```C++
 latexEquation(const char *str);
 ```
-Constructor with LaTeX Equation.
+Constructor with default value. 
 <br><br>
 ```C++
 ~latexEquation();
@@ -125,13 +135,9 @@ To set global value of independent variable, use expTree::SetValue().
 <br><br>
 ```C++
 double calculate(double value);
-```
-Calculate LaTeX Equation with given independent variable's value.
-<br><br>
-```C++
 double calculate(const char* equation);
 ```
-Calculate LaTeX Equation with given independent variable's value, parsed from string.
+Calculate LaTeX Equation with given independent variable's value, or value calculated from string.
 <br><br>
 ```C++
 latexEquation* differential();
@@ -155,12 +161,25 @@ CONSTONLY, XONLY and TONLY are available.
 
 ```C++
 void expTree::SetValue(const char* identifier, double value)
+void expTree::SetValue(const char* identifier, double value)
 ```
 Set global value of independent variable.
 When latexEquation::calculate() is called without any parameter, global value of independent variable is used.
 Only "x" and "t" are allowed for identifiers.
 expTree::SetValue("x",0.25) will set global x to 0.25.
 <br><br>
+
+```C++
+double atof_latex(const char* equation);
+```
+Calculate equation without construct latexEquation object.
+<br><br>
+
+```C++
+double atof_latex(const char* equation,double value);
+double atof_latex(const char* equation,const char *value);
+```
+Calculate equation with independent variable, without construct latexEquation object.
 
 ## Type Definition
 - eTree : Parsing tree to calculate mathematic equation.

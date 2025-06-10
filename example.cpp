@@ -19,6 +19,11 @@ f(2)=-2.87312731,  f'(2)=6.56343634
 
 int main(int argc,char *argv[])
 {
+    expTree::SetValue("a", "4");             // set a = 4
+expTree::SetValue("b", 3.6);             // set b = 3.6
+expTree::SetValue("c", "4+3\\pi");       // set c = 4+3pi
+double x = atof_latex("a+b+c");          // x = a+b+c = 11.6+3pi = 
+printf("%f",x);
     if(argc == 1)
     {
         printf("Usage: './example \"Your_Latex_Equation\"' for constant. './example \"Your_Latex_Equation_by_x\" \"x_value_1\" \"x_value_2\" ...' for equation by x\n");

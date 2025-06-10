@@ -274,7 +274,7 @@ namespace expTree
 
 	//----수식 계산 관련----
 	extern void SetValue(const char* identifier, double value);
-	
+	extern void SetValue(const char* identifier, const char* value);
 
 	//사용자 정의 함수
 	extern bool isSameValue(double a,double b);

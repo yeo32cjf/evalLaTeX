@@ -737,6 +737,31 @@ void expTree::SetValue(const char* identifier, double value)
 		expTree::cVal = value;
 }
 
+void expTree::SetValue(const char* identifier, const char* value)
+{
+	eTree *val = new eTree;
+	val->setIdentifierType(CONSTONLY);
+	val->parse(value);
+
+	if(val->parseSuccess)
+	{
+		double res = val->calculate();
+
+		if (strcmp(identifier, "x") == 0)
+			expTree::xVal = res;
+		else if (strcmp(identifier, "t") == 0)
+			expTree::tVal = res;
+		else if (strcmp(identifier, "a") == 0)
+			expTree::aVal = res;
+		else if (strcmp(identifier, "b") == 0)
+			expTree::bVal = res;
+		else if (strcmp(identifier, "c") == 0)
+			expTree::cVal = res;
+	}
+
+	delete val;
+}
+
 bool expTree::isSameValue(double a,double b)
 {
 	return (a-b<0.000001 && b-a<0.000001);
